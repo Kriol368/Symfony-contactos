@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\Contacto;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,6 +18,25 @@ class ContactoController extends AbstractController
         9 => ["nombre" => "Nora Jover", "telefono" => "54565859", "email" => "norajover@ieselcaminas.org"]
     ];
 
+    /**
+     * @Route ("/contacto/insertar", name="insertar_contacto")
+     */
+    public function insertar(ManagerRegistry  $doctrine){
+        $entityManager = $doctrine->getManager();
+        foreach($this->contactos as $c) {
+            $contacto = new Contacto();
+            $contacto->setNombre($c ["nombre"]);
+            $contacto->setTelefono($c ["telefono"]);
+            $contacto->setEmail($c ["email"]);
+            $entityManager->persist($contacto);
+        }
+        try {
+            $entityManager->flush();
+            return new Response("Contactos insertados");
+        }catch (\Exception $e){
+            return new Response("Error insertando contactos");
+        }
+    }
 
     /**
      * @Route("/contacto", name="inicio")
@@ -29,12 +49,12 @@ class ContactoController extends AbstractController
     /**
      * @Route("/contacto/{codigo}", name="ficha_contacto")
      */
-    public function ficha($codigo): Response{
-        //Si no existe el elemento con dicha clave devolvemos null
-        $resultado = ($this->contactos[$codigo] ?? null);
+    public function ficha(ManagerRegistry $doctrine, $codigo): Response{
+        $repositorio = $doctrine->getRepository(Contacto::class);
+        $contacto = $repositorio->find($codigo);
 
         return $this->render('contacto/ficha_contacto.html.twig', [
-            'contacto' => $resultado
+            'contacto' => $contacto
         ]);
     }
 
