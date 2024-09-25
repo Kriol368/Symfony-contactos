@@ -17,31 +17,25 @@ class ContactoController extends AbstractController
         9 => ["nombre" => "Nora Jover", "telefono" => "54565859", "email" => "norajover@ieselcaminas.org"]
     ];
 
+
     /**
-     * @Route("/contacto", name="app_contacto")
+     * @Route("/contacto", name="inicio")
      */
     public function index(): Response
     {
-        return $this->render('contacto/index.html.twig', [
-            'controller_name' => 'ContactoController',
-        ]);
+        return $this->render('/contacto/inicio.html.twig', []);
+
     }
     /**
      * @Route("/contacto/{codigo}", name="ficha_contacto")
      */
     public function ficha($codigo): Response{
         //Si no existe el elemento con dicha clave devolvemos null
-        $resultado = $this->contactos[$codigo] ?? null;
-        if ($resultado) {
-            $html = "<ul>";
-                $html .= "<li>" . $codigo . "</li>";
-                $html .= "<li>" . $resultado['nombre'] . "</li>";
-                $html .= "<li>" . $resultado['telefono'] . "</li>";
-                $html .= "<li>" . $resultado['email'] . "</li>";
-            $html .= "</ul>";
-            return new Response("<html><body>$html</body></html>");
-        }
-        return new Response("<html><body>Contacto $codigo no encontrado.</body></html>");
+        $resultado = ($this->contactos[$codigo] ?? null);
+
+        return $this->render('contacto/ficha_contacto.html.twig', [
+            'contacto' => $resultado
+        ]);
     }
 
     /**
