@@ -46,17 +46,6 @@ class ContactoController extends AbstractController
         $resultados = array_filter($this->contactos,function($contacto) use ($texto){
             return strpos($contacto['nombre'],$texto) !== FALSE;
         });
-        if (count($resultados)) {
-            $html = "<ul>";
-            foreach ($resultados as $id => $resultado) {
-                $html .= "<li>" . $id . "</li>";
-                $html .= "<li>" . $resultado['nombre'] . "</li>";
-                $html .= "<li>" . $resultado['telefono'] . "</li>";
-                $html .= "<li>" . $resultado['email'] . "</li>";
-            }
-            $html .= "</ul>";
-            return new Response("<html><body>$html</body></html>");
-        }
-        return new Response("<html><body>No se ha encontrado ningún contacto</body></html>");
+        return $this->render('contacto/lista_contactos.html.twig', ['contactos' => $resultados]);
     }
 }
