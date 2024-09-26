@@ -61,11 +61,41 @@ class ContactoController extends AbstractController
     /**
      * @Route("/contacto/buscar/{texto}", name="buscar_contacto")
      */
-    public function buscar ($texto): Response{
+    public function buscar (ManagerRegistry $doctrine, $texto): Response{
         //Filtramos aquellos que tengan dicho texto en el nombre
-        $resultados = array_filter($this->contactos,function($contacto) use ($texto){
-            return strpos($contacto['nombre'],$texto) !== FALSE;
-        });
-        return $this->render('contacto/lista_contactos.html.twig', ['contactos' => $resultados]);
+        $repositorio = $doctrine->getRepository(Contacto::class);
+        $contactos = $repositorio->findByName($texto);
+        return $this->render('contacto/lista_contactos.html.twig', [
+           'contactos' => $contactos
+        ]);
     }
+
+    /**
+     * @Route("/contacto/update/{id}/{nombre}", name="modificar_contacto")
+     */
+    public function update(ManagerRegistry $doctrine, $id, $nombre): Response {
+        $entityManager = $doctrine->getManager();
+        $repositorio = $doctrine->getRepository(Contacto::class);
+        $contacto = $repositorio->find($id);
+
+        if ($contacto) {
+            $contacto->setNombre($nombre);
+            try {
+                $entityManager->flush();
+                return $this->render('contacto/ficha_contacto.html.twig', [
+                    'contacto' => $contacto
+                ]);
+            } catch (\Exception $e) {
+                return new Response("Error insertando objetos");
+            }
+        } else {
+            return $this->render('contacto/ficha_contacto.html.twig', [
+                'contacto' => null
+            ]);
+        }
+    }
+
+
+
+
 }
